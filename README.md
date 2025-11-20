@@ -1,14 +1,14 @@
-# **Guide to Generating Environment Variables for Gmail and Outlook IMAP Access**
 
-This document explains how to generate all the values required in your `.env` file for Gmail and Outlook IMAP access. Each section includes simple steps and clear descriptions.
+
+# **Gmail IMAP OAuth Environment Variable Setup Guide**
+
+This document provides a step-by-step guide for generating all required environment variables to enable IMAP access for Gmail using OAuth 2.0 authentication. Follow each section carefully to ensure a complete and secure configuration.
 
 ---
 
-## **1. Gmail OAuth Variables**
+## **Required Environment Variables**
 
-These values are needed to authenticate Gmail IMAP using OAuth.
-
-### **Environment Variables**
+Add the following variables to your `.env` file:
 
 ```env
 GMAIL_CLIENT_ID=
@@ -18,54 +18,107 @@ GMAIL_REFRESH_TOKEN=
 GMAIL_EMAIL=
 ```
 
-### **Step 1: Create a Google Cloud Project**
+Each variable is explained in the sections below.
 
-1. Open [https://console.cloud.google.com](https://console.cloud.google.com)
-2. Create a new project
-3. Select the project
+---
 
-### **Step 2: Enable Gmail API**
+## **1. Enable IMAP in Gmail**
 
-1. Go to “APIs and Services”
-2. Search for “Gmail API”
-3. Click “Enable”
+IMAP must be enabled in your Gmail account for the application to read emails.
 
-### **Step 3: Create OAuth Client**
+**Steps:**
 
-1. Go to “APIs and Services” → “Credentials”
-2. Click “Create Credentials” → “OAuth Client ID”
-3. Choose “Desktop App”
-4. Download the OAuth client JSON file
-5. Copy the following from the file:
+1. Open Gmail.
+2. Navigate to **Settings → See all settings**.
+3. Open the **Forwarding and POP/IMAP** tab.
+4. Under **IMAP Access**, select **Enable IMAP**.
+5. Save your changes.
 
-   * `client_id`
-   * `client_secret`
+This step is mandatory. IMAP authentication will fail if it is not enabled.
 
-Update your `.env`:
+---
+
+## **2. Create a Google Cloud Project**
+
+1. Open the Google Cloud Console:
+   [https://console.cloud.google.com](https://console.cloud.google.com)
+2. Click **New Project**.
+3. Enter a project name and (optionally) organization.
+4. Click **Create**.
+5. Select the newly created project.
+
+---
+
+## **3. Enable the Gmail API**
+
+1. Navigate to **APIs & Services → Enable APIs and Services**.
+2. Search for **Gmail API**.
+3. Select it and click **Enable**.
+
+---
+
+## **4. Configure the OAuth Consent Screen**
+
+1. Go to **APIs & Services → OAuth Consent Screen**.
+2. Select the **External** user type.
+3. Provide the required application information.
+4. Under **Scopes**, click **Add or Remove Scopes**.
+5. Add the following recommended scopes:
+
+   * `userinfo.email`
+   * `userinfo.profile`
+   * `gmail.modify`
+6. Save and proceed.
+7. You may keep the app in **Testing** mode.
+
+---
+
+## **5. Create an OAuth Client (Desktop Application)**
+
+1. Go to **APIs & Services → Credentials**.
+2. Click **Create Credentials → OAuth Client ID**.
+3. Choose **Desktop App** as the application type.
+4. Enter a name and click **Create**.
+5. Download the OAuth client JSON file.
+
+From the downloaded file, copy:
+
+* `client_id`
+* `client_secret`
+
+Add them to your `.env` file:
 
 ```env
 GMAIL_CLIENT_ID=<client_id>
 GMAIL_CLIENT_SECRET=<client_secret>
 ```
 
-### **Step 4: Generate Tokens**
+---
 
-Run your token script:
+## **6. Generate Access and Refresh Tokens**
+
+Run your Gmail OAuth script:
 
 ```bash
 python -m src.gmail_oauth
 ```
 
-After login, the script prints:
+A browser window will open prompting you to log in and authorize access.
+
+After successful authorization, the script will output:
 
 ```
-GMAIL_ACCESS_TOKEN=xxxx
-GMAIL_REFRESH_TOKEN=yyyy
+GMAIL_ACCESS_TOKEN=...
+GMAIL_REFRESH_TOKEN=...
 ```
 
-Copy both into `.env`.
+Insert both values into your `.env` file.
 
-### **Step 5: Add your Gmail address**
+---
+
+## **7. Add Your Gmail Address**
+
+Include your Gmail account email:
 
 ```env
 GMAIL_EMAIL=your_email@gmail.com
@@ -73,110 +126,16 @@ GMAIL_EMAIL=your_email@gmail.com
 
 ---
 
-## **2. Outlook OAuth Variables**
-
-These are required to authenticate Outlook IMAP using OAuth.
-
-### **Environment Variables**
-
-```env
-OUTLOOK_CLIENT_ID=
-OUTLOOK_TENANT_ID=common
-OUTLOOK_ACCESS_TOKEN=
-OUTLOOK_EMAIL=
-```
-
-### **Step 1: Create an App in Azure**
-
-1. Open [https://portal.azure.com](https://portal.azure.com)
-2. Go to “Azure Active Directory”
-3. Open “App Registrations”
-4. Click “New registration”
-5. Set supported account types to “Accounts in any organization”
-6. Copy the Application (client) ID
-
-Update `.env`:
-
-```env
-OUTLOOK_CLIENT_ID=<client-id>
-```
-
-### **Step 2: Add Tenant**
-
-Always set:
-
-```env
-OUTLOOK_TENANT_ID=common
-```
-
-### **Step 3: Generate Access Token**
-
-Run:
-
-```bash
-python -m src.outlook_oauth
-```
-
-After login, the script prints:
-
-```
-OUTLOOK_ACCESS_TOKEN=xxxxx
-```
-
-Copy it into `.env`.
-
-### **Step 4: Add your Outlook Email**
-
-```env
-OUTLOOK_EMAIL=yourname@outlook.com
-```
-
----
-
-## **3. Outlook Password Option Without OAuth**
-
-You can log in using a password or app password.
-
-### **Environment Variable**
-
-```env
-OUTLOOK_PASSWORD=
-```
-
-### **Steps**
-
-1. Open [https://account.live.com/proofs](https://account.live.com/proofs)
-2. Turn on two-step verification
-3. Open “App passwords”
-4. Create a new app password
-5. Place it in `.env`:
-
-```env
-OUTLOOK_PASSWORD=<app-password>
-```
-
----
-
-## **4. Example .env File**
+## **8. Example `.env` File**
 
 ```env
 # Gmail OAuth
-GMAIL_CLIENT_ID=xxxxxxxxx
-GMAIL_CLIENT_SECRET=yyyyyyyyy
-GMAIL_ACCESS_TOKEN=zzzzzzzzzz
-GMAIL_REFRESH_TOKEN=rrrrrrrrrr
+GMAIL_CLIENT_ID=1234567890-abc123.apps.googleusercontent.com
+GMAIL_CLIENT_SECRET=ABCXYZ12345
+GMAIL_ACCESS_TOKEN=ya29.a0AfH6...
+GMAIL_REFRESH_TOKEN=1//0gdfsg34...
 GMAIL_EMAIL=yourname@gmail.com
-
-# Outlook OAuth
-OUTLOOK_CLIENT_ID=aaaaaaaaaaa
-OUTLOOK_TENANT_ID=common
-OUTLOOK_ACCESS_TOKEN=bbbbbbbbbbb
-OUTLOOK_EMAIL=yourname@outlook.com
-
-# Outlook password-only option
-OUTLOOK_PASSWORD=ccccccccccc
 ```
 
 ---
-
 
