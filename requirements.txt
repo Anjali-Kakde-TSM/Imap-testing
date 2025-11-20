@@ -1,0 +1,7 @@
+python-dotenv
+oauthlib
+requests
+requests-oauthlib
+google-auth-oauthlib
+google-auth
+msal
