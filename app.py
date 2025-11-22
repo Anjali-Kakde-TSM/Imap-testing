@@ -7,6 +7,8 @@ import html
 import streamlit as st
 from dotenv import load_dotenv
 
+load_dotenv()
+
 from src.imap_client import AsyncIMAPClient
 from src.email_parser import EmailParser
 from src.token_utils import (
@@ -22,9 +24,6 @@ from src.accounts import (
     get_access_token_for_account,
 )
 
-load_dotenv()
-
-print("DEBUG TOKEN KEY:", os.getenv("TOKEN_ENCRYPTION_KEY"))
 
 create_db_and_tables()
 
