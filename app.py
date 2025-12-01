@@ -17,15 +17,13 @@ from src.token_utils import (
     refresh_outlook_access_token,
     get_outlook_email_from_access_token,
 )
-from src.auth import create_db_and_tables, authenticate_user, register_user
+from src.auth import authenticate_user, register_user
 from src.accounts import (
     list_email_accounts_for_user,
     create_email_account_for_user,
     get_access_token_for_account,
 )
 
-
-create_db_and_tables()
 
 # -------------------------------------------------------------------
 # Page config & styling
@@ -50,6 +48,26 @@ st.markdown(
         padding-top: 0.5rem;
         padding-bottom: 0.5rem;
     }
+    .connect-btns {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .connect-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.55rem 0.9rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        color: var(--text-color);
+        background: linear-gradient(180deg, #ffffff11 0%, #ffffff06 100%);
+        border: 1px solid rgba(255,255,255,0.06);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+    }
+    .connect-btn:hover { transform: translateY(-1px); }
+    .connect-gmail { background: linear-gradient(90deg, #e94235 0%, #c92b1f 100%); color: white; }
+    .connect-outlook { background: linear-gradient(90deg, #0078d4 0%, #005ea6 100%); color: white; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -159,19 +177,41 @@ with st.sidebar:
             selected_label = st.selectbox("Select account", options=labels)
             selected_account_id = id_map[selected_label]
         else:
-            st.info("No email accounts yet. Add one below.")
+            st.info("No email accounts yet. Connect one below.")
             selected_account_id = None
 
         st.session_state.selected_account_id = selected_account_id
 
-        with st.expander("➕ Add new account"):
+        # --- Connect via backend ---
+        backend_base = os.getenv("BACKEND_BASE_URL", "http://localhost:8000")
+        connect_gmail_url = f"{backend_base}/oauth/google/start?user_id={st.session_state.user_id}"
+        connect_outlook_url = f"{backend_base}/oauth/outlook/start?user_id={st.session_state.user_id}"
+
+        st.markdown("#### Connect new account")
+
+        col_g, col_o = st.columns(2)
+
+        with col_g:
+            st.link_button("🔗 Connect Gmail", connect_gmail_url)
+
+        with col_o:
+            st.link_button("🔗 Connect Outlook", connect_outlook_url)
+
+        st.caption(
+            "Each button opens a new tab for provider sign-in. After you allow access, "
+            "return here and the account will appear in the list above."
+        )
+
+
+        # Optional: advanced manual path for debug
+        with st.expander("Advanced: Add with refresh token"):
             new_provider = st.selectbox("Provider", ["gmail", "outlook"], key="new_acc_provider")
             new_email = st.text_input("Email address", key="new_acc_email")
             new_refresh = st.text_area(
                 "Refresh token",
                 key="new_acc_refresh",
                 height=100,
-                help="Paste the refresh token obtained from the Gmail/Outlook OAuth flow.",
+                help="Paste the refresh token obtained from a manual OAuth flow.",
             )
             save_btn = st.button("Save account", key="save_new_account")
 

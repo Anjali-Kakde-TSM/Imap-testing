@@ -10,7 +10,13 @@ from cryptography.fernet import Fernet, InvalidToken
 # DB setup
 # -------------------------------------------------------------------
 
-DATABASE_URL = os.getenv("APP_DB_URL", "sqlite:///./app.db")
+# Use absolute path to ensure both Streamlit and FastAPI use the same database
+# Find project root (where this file's parent's parent is)
+_current_file = os.path.abspath(__file__)
+_project_root = os.path.dirname(os.path.dirname(_current_file))
+_default_db_path = os.path.join(_project_root, "app.db")
+
+DATABASE_URL = os.getenv("APP_DB_URL", f"sqlite:///{_default_db_path}")
 engine = create_engine(DATABASE_URL, echo=False)
 
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
