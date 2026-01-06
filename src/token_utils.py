@@ -174,7 +174,10 @@ def get_outlook_email_from_access_token(access_token: str) -> Optional[str]:
 
 
 def refresh_outlook_access_token(refresh_token: str) -> Optional[str]:
-    """Use the OAuth2 refresh_token to get a fresh Outlook access token."""
+    """Use the OAuth2 refresh_token to get a fresh Outlook access token.
+    
+    Supports both public clients (no secret) and confidential clients (with secret).
+    """
     if not refresh_token:
         return None
 
@@ -182,8 +185,8 @@ def refresh_outlook_access_token(refresh_token: str) -> Optional[str]:
     client_secret = os.getenv("OUTLOOK_CLIENT_SECRET")
     tenant_id = os.getenv("OUTLOOK_TENANT_ID", "common")
 
-    if not client_id or not client_secret:
-        raise RuntimeError("OUTLOOK_CLIENT_ID and OUTLOOK_CLIENT_SECRET must be set")
+    if not client_id:
+        raise RuntimeError("OUTLOOK_CLIENT_ID must be set")
 
     token_endpoint = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
 
@@ -195,11 +198,15 @@ def refresh_outlook_access_token(refresh_token: str) -> Optional[str]:
 
     data = {
         "client_id": client_id,
-        "client_secret": client_secret,
         "grant_type": "refresh_token",
         "refresh_token": refresh_token,
         "scope": scope,
     }
+    
+    # Only add client_secret if it's set (confidential client)
+    # Public clients (mobile/desktop apps) should NOT send client_secret
+    if client_secret:
+        data["client_secret"] = client_secret
 
     try:
         resp = requests.post(token_endpoint, data=data, timeout=10)
